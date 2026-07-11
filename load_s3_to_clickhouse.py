@@ -35,6 +35,8 @@ ch_username = os.getenv("CLICKHOUSE_USERNAME", "default")
 ch_password = os.getenv("CLICKHOUSE_PASSWORD")
 ch_database = os.getenv("CLICKHOUSE_DATABASE", "default")
 truncate_before_load = os.getenv("TRUNCATE_BEFORE_LOAD", "false").lower() == "true"
+logger.info(f"TRUNCATE_BEFORE_LOAD raw env value: '{os.getenv('TRUNCATE_BEFORE_LOAD')}'")
+logger.info(f"truncate_before_load parsed boolean: {truncate_before_load}")
 
 # Check required configurations
 if not aws_access_key or not aws_secret_key:
