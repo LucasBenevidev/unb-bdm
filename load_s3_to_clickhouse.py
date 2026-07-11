@@ -75,10 +75,11 @@ COMPLETA_CSV_COLS = [
 
 def create_log_table_if_not_exists(ch_client):
     """Create execution log table in ClickHouse"""
-    logger.info("Ensuring metadata table 'log_cargas' exists...")
+    logger.info("Ensuring metadata table 'log_cargas' exists and has the execution ID column...")
     query = """
     CREATE TABLE IF NOT EXISTS log_cargas (
         data_execucao DateTime DEFAULT now(),
+        id_execucao UInt32,
         nome_arquivo String,
         tempo_carga Float64,
         total_linhas UInt64,
@@ -87,6 +88,8 @@ def create_log_table_if_not_exists(ch_client):
     ORDER BY data_execucao;
     """
     ch_client.command(query)
+    # Safely alter the table in case it was created without the id_execucao column previously
+    ch_client.command("ALTER TABLE log_cargas ADD COLUMN IF NOT EXISTS id_execucao UInt32")
 
 def truncate_tables_if_requested(ch_client):
     """Truncate data staging tables only (preserving log_cargas table)"""
@@ -101,16 +104,16 @@ def file_already_loaded(ch_client, filename):
     res = ch_client.query("SELECT count() FROM log_cargas WHERE nome_arquivo = %s", [filename])
     return res.result_set[0][0] > 0
 
-def log_execution(ch_client, filename, duration, rows_count, rows_per_sec):
+def log_execution(ch_client, filename, duration, rows_count, rows_per_sec, execution_id):
     """Insert loading metadata into ClickHouse"""
-    logger.info(f"Saving load stats for '{filename}' to log_cargas...")
+    logger.info(f"Saving load stats for '{filename}' to log_cargas (Execution ID: {execution_id})...")
     ch_client.insert(
         "log_cargas",
-        [[filename, duration, rows_count, rows_per_sec]],
-        column_names=["nome_arquivo", "tempo_carga", "total_linhas", "linhas_por_segundo"]
+        [[execution_id, filename, duration, rows_count, rows_per_sec]],
+        column_names=["id_execucao", "nome_arquivo", "tempo_carga", "total_linhas", "linhas_por_segundo"]
     )
 
-def load_csv_file(ch_client, s3_client, s3_key, ch_table, target_csv_cols):
+def load_csv_file(ch_client, s3_client, s3_key, ch_table, target_csv_cols, execution_id):
     """Run native ClickHouse S3 loading query for the file"""
     filename = os.path.basename(s3_key)
     
@@ -190,7 +193,7 @@ def load_csv_file(ch_client, s3_client, s3_key, ch_table, target_csv_cols):
     logger.info(f"SUCCESS: Loaded {rows_count} rows from '{filename}' into '{ch_table}' in {duration:.2f}s ({rows_per_sec:.2f} rows/sec)")
     
     # 3. Log metadata in ClickHouse
-    log_execution(ch_client, filename, duration, rows_count, rows_per_sec)
+    log_execution(ch_client, filename, duration, rows_count, rows_per_sec, execution_id)
 
 def main():
     logger.info("Initializing S3 and ClickHouse Cloud connections...")
@@ -216,6 +219,12 @@ def main():
         
         # Ensure log table exists
         create_log_table_if_not_exists(ch_client)
+        
+        # Get the next execution run ID (sequential integer)
+        res = ch_client.query("SELECT max(id_execucao) FROM log_cargas")
+        max_id = res.result_set[0][0]
+        execution_id = int((max_id or 0) + 1)
+        logger.info(f"Assigned Execution ID: {execution_id} for this loading run.")
         
         # Truncate tables if requested
         truncate_tables_if_requested(ch_client)
@@ -258,7 +267,7 @@ def main():
             continue
             
         try:
-            load_csv_file(ch_client, s3_client, key, ch_table, target_csv_cols)
+            load_csv_file(ch_client, s3_client, key, ch_table, target_csv_cols, execution_id)
         except Exception as ex:
             logger.error(f"Error loading '{filename}': {ex}")
             
