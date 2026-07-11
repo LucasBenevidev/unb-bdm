@@ -1,11 +1,23 @@
 import os
 import sys
 import time
+import logging
 import clickhouse_connect
 from dotenv import load_dotenv
 
 # Load configuration from the absolute path of the .env file
 load_dotenv("c:/Users/lucas/dev/unb-bdm/.env")
+
+# Logging Configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("siorg_benchmark.log", encoding="utf-8")
+    ]
+)
+logger = logging.getLogger("siorg_benchmarker")
 
 # ClickHouse Configuration
 ch_host = os.getenv("CLICKHOUSE_HOST")
@@ -13,16 +25,23 @@ ch_port_str = os.getenv("CLICKHOUSE_PORT", "8443")
 ch_username = os.getenv("CLICKHOUSE_USERNAME", "default")
 ch_password = os.getenv("CLICKHOUSE_PASSWORD")
 ch_database = os.getenv("CLICKHOUSE_DATABASE", "default")
+benchmark_runs_str = os.getenv("BENCHMARK_RUNS", "1")
 
 # Check required configurations
 if not ch_host or not ch_password:
-    print("Error: ClickHouse credentials not configured in the .env file.")
+    logger.error("ClickHouse credentials not configured in the .env file.")
     sys.exit(1)
 
 try:
     ch_port = int(ch_port_str)
 except ValueError:
-    print(f"Error: Invalid ClickHouse port '{ch_port_str}'. Must be an integer.")
+    logger.error(f"Invalid ClickHouse port '{ch_port_str}'. Must be an integer.")
+    sys.exit(1)
+
+try:
+    benchmark_runs = int(benchmark_runs_str)
+except ValueError:
+    logger.error(f"Invalid BENCHMARK_RUNS '{benchmark_runs_str}'. Must be an integer.")
     sys.exit(1)
 
 # Analytical Queries Definitions (No trailing semicolons)
@@ -83,7 +102,7 @@ queries = {
 }
 
 def run_benchmark():
-    print(f"Connecting to ClickHouse Cloud at {ch_host}:{ch_port}...")
+    logger.info(f"Connecting to ClickHouse Cloud at {ch_host}:{ch_port}...")
     try:
         client = clickhouse_connect.get_client(
             host=ch_host,
@@ -94,56 +113,69 @@ def run_benchmark():
             secure=True
         )
     except Exception as e:
-        print(f"Connection failed: {e}")
+        logger.error(f"Connection failed: {e}")
         sys.exit(1)
 
-    print("\n--- Starting Query Performance Benchmark ---\n")
+    logger.info(f"--- Starting Query Performance Benchmark (Runs: {benchmark_runs}) ---\n")
 
-    for name, sql_text in queries.items():
-        print(f"Executing: {name}...")
-        
-        # Client-side time measurement
-        t_start = time.time()
-        
+    for run in range(1, benchmark_runs + 1):
+        # 1. Query current max execution ID to compute the next execution_id for this loop run
         try:
-            # Run query
-            res = client.query(sql_text)
-            
-            # Client-side end time
-            t_end = time.time()
-            client_duration = t_end - t_start
-            
-            # Get stats directly from ClickHouse response summary
-            query_id = res.query_id or "N/A"
-            
-            # Explicitly cast metrics to integers to prevent formatting errors
-            read_rows = int(res.summary.get('read_rows', 0))
-            read_bytes = int(res.summary.get('read_bytes', 0))
-            
-            # ClickHouse engine execution time (fallback to client-side if missing)
-            elapsed_seconds = float(res.summary.get('elapsed', client_duration))
-            if elapsed_seconds == 0.0:
-                elapsed_seconds = client_duration
-                
-            result_rows = int(len(res.result_set))
-            
-            print(f"  Query ID: {query_id}")
-            print(f"  Duration: {elapsed_seconds:.4f} seconds (Client-measured: {client_duration:.4f}s)")
-            print(f"  Scanned: {read_rows:,} rows ({read_bytes / (1024*1024):.2f} MB)")
-            print(f"  Result set size: {result_rows:,} rows")
-            
-            # Insert statistics into log_consultas
-            client.insert(
-                "log_consultas",
-                [[name, query_id, elapsed_seconds, read_rows, read_bytes, result_rows, sql_text]],
-                column_names=["query_name", "query_id", "elapsed_seconds", "read_rows", "read_bytes", "result_rows", "query_text"]
-            )
-            print("  Metrics logged successfully.\n")
-            
+            res_max = client.query("SELECT max(id_execucao) FROM log_consultas")
+            max_id = res_max.result_set[0][0]
+            execution_id = int((max_id or 0) + 1)
         except Exception as e:
-            print(f"  Error executing query: {e}\n")
+            logger.error(f"Failed to fetch max execution_id: {e}")
+            client.close()
+            sys.exit(1)
 
-    print("--- Benchmark execution complete ---")
+        logger.info(f"=== LOOP ITERATION {run}/{benchmark_runs} (Assigned Execution ID: {execution_id}) ===")
+
+        for name, sql_text in queries.items():
+            logger.info(f"Executing: {name}...")
+            
+            # Client-side time measurement
+            t_start = time.time()
+            
+            try:
+                # Run query
+                res = client.query(sql_text)
+                
+                # Client-side end time
+                t_end = time.time()
+                client_duration = t_end - t_start
+                
+                # Get stats directly from ClickHouse response summary
+                query_id = res.query_id or "N/A"
+                
+                # Explicitly cast metrics to integers to prevent formatting errors
+                read_rows = int(res.summary.get('read_rows', 0))
+                read_bytes = int(res.summary.get('read_bytes', 0))
+                
+                # ClickHouse engine execution time (fallback to client-side if missing)
+                elapsed_seconds = float(res.summary.get('elapsed', client_duration))
+                if elapsed_seconds == 0.0:
+                    elapsed_seconds = client_duration
+                    
+                result_rows = int(len(res.result_set))
+                
+                logger.info(f"  Query ID: {query_id}")
+                logger.info(f"  Duration: {elapsed_seconds:.4f} seconds (Client-measured: {client_duration:.4f}s)")
+                logger.info(f"  Scanned: {read_rows:,} rows ({read_bytes / (1024*1024):.2f} MB)")
+                logger.info(f"  Result set size: {result_rows:,} rows")
+                
+                # Insert statistics into log_consultas
+                client.insert(
+                    "log_consultas",
+                    [[execution_id, name, query_id, elapsed_seconds, read_rows, read_bytes, result_rows, sql_text]],
+                    column_names=["id_execucao", "query_name", "query_id", "elapsed_seconds", "read_rows", "read_bytes", "result_rows", "query_text"]
+                )
+                logger.info("  Metrics logged successfully.\n")
+                
+            except Exception as e:
+                logger.error(f"  Error executing query: {e}\n")
+
+    logger.info("--- Benchmark execution complete ---")
     client.close()
 
 if __name__ == "__main__":

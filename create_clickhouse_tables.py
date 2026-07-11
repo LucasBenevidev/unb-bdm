@@ -125,6 +125,7 @@ ORDER BY (ano_referencia, mes_referencia);
 CREATE_LOG_CONSULTAS_TABLE = """
 CREATE TABLE IF NOT EXISTS log_consultas (
     data_execucao DateTime DEFAULT now(),
+    id_execucao UInt32,
     query_name String,
     query_id String,
     elapsed_seconds Float64,
@@ -182,6 +183,7 @@ try:
     # 6. Create query logs table (WITHOUT dropping first, to preserve history)
     print("Ensuring benchmarking metadata table 'log_consultas' exists...")
     client.command(CREATE_LOG_CONSULTAS_TABLE)
+    client.command("ALTER TABLE log_consultas ADD COLUMN IF NOT EXISTS id_execucao UInt32")
     print("Table 'log_consultas' verified/created successfully.")
     
     print("\nAll database structures created successfully!")
