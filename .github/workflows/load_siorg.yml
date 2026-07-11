@@ -2,12 +2,6 @@ name: Carga de Dados SIORG
 
 on:
   workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
-    inputs:
-      truncate:
-        description: "Truncate ClickHouse tables before loading?"
-        type: boolean
-        required: true
-        default: true
 
 jobs:
   load-data:
@@ -43,8 +37,8 @@ jobs:
           CLICKHOUSE_PORT: 8443
           CLICKHOUSE_USERNAME: "default"
           
-          # Control parameter mapped to workflow input
-          TRUNCATE_BEFORE_LOAD: ${{ github.event.inputs.truncate }}
+          # Hardcoded to true so it truncates staging tables and loads everything fresh on every run
+          TRUNCATE_BEFORE_LOAD: "true"
         run: |
           python load_s3_to_clickhouse.py
 
