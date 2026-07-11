@@ -122,6 +122,20 @@ CREATE TABLE IF NOT EXISTS estrutura_organizacional_completa (
 ORDER BY (ano_referencia, mes_referencia);
 """
 
+CREATE_LOG_CONSULTAS_TABLE = """
+CREATE TABLE IF NOT EXISTS log_consultas (
+    data_execucao DateTime DEFAULT now(),
+    query_name String,
+    query_id String,
+    elapsed_seconds Float64,
+    read_rows UInt64,
+    read_bytes UInt64,
+    result_rows UInt64,
+    query_text String
+) ENGINE = MergeTree()
+ORDER BY data_execucao;
+"""
+
 print(f"Connecting to ClickHouse Cloud at {host}:{port}...")
 
 try:
@@ -148,22 +162,27 @@ try:
         secure=True
     )
     
-    # 3. Drop existing tables if they exist to force clean recreation
+    # 3. Drop existing data tables if they exist to force clean recreation
     print("Dropping existing table 'distribuicao_orgaos' if it exists...")
     client.command("DROP TABLE IF EXISTS distribuicao_orgaos")
     
     print("Dropping existing table 'estrutura_organizacional_completa' if it exists...")
     client.command("DROP TABLE IF EXISTS estrutura_organizacional_completa")
     
-    # 4. Create first table
+    # 4. Create first data table
     print("Creating table 'distribuicao_orgaos'...")
     client.command(CREATE_DISTRIBUICAO_TABLE)
     print("Table 'distribuicao_orgaos' created successfully.")
     
-    # 5. Create second table
+    # 5. Create second data table
     print("Creating table 'estrutura_organizacional_completa'...")
     client.command(CREATE_COMPLETA_TABLE)
     print("Table 'estrutura_organizacional_completa' created successfully.")
+    
+    # 6. Create query logs table (WITHOUT dropping first, to preserve history)
+    print("Ensuring benchmarking metadata table 'log_consultas' exists...")
+    client.command(CREATE_LOG_CONSULTAS_TABLE)
+    print("Table 'log_consultas' verified/created successfully.")
     
     print("\nAll database structures created successfully!")
     client.close()
