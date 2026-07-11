@@ -67,9 +67,14 @@ CREATE TABLE IF NOT EXISTS distribuicao_orgaos (
     regra_autoridade Nullable(String),
     regra_cargo_nome_unidade Nullable(String),
     temporario Nullable(String),
-    cod_instancia Nullable(String)
+    cod_instancia Nullable(String),
+    
+    -- DWH Snapshot and audit columns
+    ano_referencia UInt16,
+    mes_referencia UInt8,
+    data_carga DateTime DEFAULT now()
 ) ENGINE = MergeTree()
-ORDER BY tuple();
+ORDER BY (ano_referencia, mes_referencia);
 """
 
 CREATE_COMPLETA_TABLE = """
@@ -107,9 +112,14 @@ CREATE TABLE IF NOT EXISTS estrutura_organizacional_completa (
     uf Nullable(String),
     municipio Nullable(String),
     pais Nullable(String),
-    horarioFuncionamento Nullable(String)
+    horarioFuncionamento Nullable(String),
+    
+    -- DWH Snapshot and audit columns
+    ano_referencia UInt16,
+    mes_referencia UInt8,
+    data_carga DateTime DEFAULT now()
 ) ENGINE = MergeTree()
-ORDER BY tuple();
+ORDER BY (ano_referencia, mes_referencia);
 """
 
 print(f"Connecting to ClickHouse Cloud at {host}:{port}...")
@@ -138,12 +148,19 @@ try:
         secure=True
     )
     
-    # Create first table
+    # 3. Drop existing tables if they exist to force clean recreation
+    print("Dropping existing table 'distribuicao_orgaos' if it exists...")
+    client.command("DROP TABLE IF EXISTS distribuicao_orgaos")
+    
+    print("Dropping existing table 'estrutura_organizacional_completa' if it exists...")
+    client.command("DROP TABLE IF EXISTS estrutura_organizacional_completa")
+    
+    # 4. Create first table
     print("Creating table 'distribuicao_orgaos'...")
     client.command(CREATE_DISTRIBUICAO_TABLE)
     print("Table 'distribuicao_orgaos' created successfully.")
     
-    # Create second table
+    # 5. Create second table
     print("Creating table 'estrutura_organizacional_completa'...")
     client.command(CREATE_COMPLETA_TABLE)
     print("Table 'estrutura_organizacional_completa' created successfully.")

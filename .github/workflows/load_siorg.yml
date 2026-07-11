@@ -1,0 +1,48 @@
+name: Carga de Dados SIORG
+
+on:
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
+
+jobs:
+  load-data:
+    name: Load S3 CSV to ClickHouse
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3 python-dotenv clickhouse-connect requests
+
+      - name: Run S3 to ClickHouse Ingestion Script
+        env:
+          # AWS S3 Secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+          S3_BUCKET_NAME: "unb-bdm-siorg"
+          
+          # ClickHouse Cloud Secrets
+          CLICKHOUSE_HOST: ${{ secrets.CLICKHOUSE_HOST }}
+          CLICKHOUSE_PASSWORD: ${{ secrets.CLICKHOUSE_PASSWORD }}
+          CLICKHOUSE_DATABASE: ${{ secrets.CLICKHOUSE_DATABASE }}
+          CLICKHOUSE_PORT: 8443
+          CLICKHOUSE_USERNAME: "default"
+        run: |
+          python load_s3_to_clickhouse.py
+
+      - name: Upload Ingestion Log File
+        if: always() # Upload logs even if the loading script fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: siorg-loading-logs
+          path: siorg_load.log
+          retention-days: 7
