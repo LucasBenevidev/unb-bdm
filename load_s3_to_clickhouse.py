@@ -8,8 +8,8 @@ import boto3
 import clickhouse_connect
 from dotenv import load_dotenv
 
-# Load configuration from .env file
-load_dotenv()
+# Load configuration from the absolute path of the .env file
+load_dotenv("c:/Users/lucas/dev/unb-bdm/.env")
 
 # Logging Configuration
 logging.basicConfig(
@@ -34,6 +34,7 @@ ch_port_str = os.getenv("CLICKHOUSE_PORT", "8443")
 ch_username = os.getenv("CLICKHOUSE_USERNAME", "default")
 ch_password = os.getenv("CLICKHOUSE_PASSWORD")
 ch_database = os.getenv("CLICKHOUSE_DATABASE", "default")
+truncate_before_load = os.getenv("TRUNCATE_BEFORE_LOAD", "false").lower() == "true"
 
 # Check required configurations
 if not aws_access_key or not aws_secret_key:
@@ -50,29 +51,25 @@ except ValueError:
     logger.error(f"Invalid ClickHouse port '{ch_port_str}'. Must be an integer.")
     sys.exit(1)
 
-# ClickHouse Table Schemas Column Lists (excluding data_carga which has DEFAULT now())
-DISTRIBUICAO_COLUMNS = [
+# ClickHouse Table Columns (excluding DWH audit/metadata columns which are appended by Python/SQL)
+DISTRIBUICAO_CSV_COLS = [
     'nivel_hierarquico', 'cod_orgao_entidade', 'nome_orgao_entidade', 'sigla_orgao_entidade',
     'natureza_juridica', 'subnatureza_juridica', 'poder', 'esfera', 'cod_unidade_pai', 'cod_unidade',
     'nome_unidade', 'sigla_unidade', 'endereco', 'endereco_complemento', 'bairro', 'municipio', 'uf',
     'cep', 'telefone', 'email', 'area_atuacao', 'nivel_normatizacao', 'autonomia_gestao_cargos',
     'tipo_cargo', 'categoria_cargo', 'nivel_cargo', 'quantidade', 'denominacao_cargo',
     'complemento_denominacao', 'mobilidade', 'obriga_distribuicao', 'compoe_estrutura', 'autoridade',
-    'regra_autoridade', 'regra_cargo_nome_unidade', 'temporario', 'cod_instancia',
-    'ano_referencia', 'mes_referencia'
+    'regra_autoridade', 'regra_cargo_nome_unidade', 'temporario', 'cod_instancia'
 ]
 
-COMPLETA_COLUMNS = [
+COMPLETA_CSV_COLS = [
     'codigoUnidade', 'codigoUnidadePai', 'codigoOrgaoEntidade', 'codigoTipoUnidade', 'nome', 'sigla',
     'codigoEsfera', 'codigoPoder', 'codigoNaturezaJuridica', 'codigoSubNaturezaJuridica', 'nivelNormatizacao',
     'versaoConsulta', 'dataInicialVersaoConsulta', 'dataFinalVersaoConsulta', 'operacao',
     'codigoUnidadePaiAnterior', 'codigoOrgaoEntidadeAnterior', 'regulamentoEspecifico', 'codigoCategoriaUnidade',
     'competencia', 'finalidade', 'missao', 'descricaoAtoNormativo', 'areaAtuacao', 'telefone', 'email', 'site',
-    'linhaEndereco', 'bairro', 'cep', 'uf', 'municipio', 'pais', 'horarioFuncionamento',
-    'ano_referencia', 'mes_referencia'
+    'linhaEndereco', 'bairro', 'cep', 'uf', 'municipio', 'pais', 'horarioFuncionamento'
 ]
-
-TEMP_DIR = "temp_load"
 
 def create_log_table_if_not_exists(ch_client):
     """Create execution log table in ClickHouse"""
@@ -89,6 +86,14 @@ def create_log_table_if_not_exists(ch_client):
     """
     ch_client.command(query)
 
+def truncate_tables_if_requested(ch_client):
+    """Truncate data staging tables only (preserving log_cargas table)"""
+    if truncate_before_load:
+        logger.info("TRUNCATE_BEFORE_LOAD=true detected. Truncating data tables (preserving log_cargas history)...")
+        ch_client.command("TRUNCATE TABLE IF EXISTS distribuicao_orgaos")
+        ch_client.command("TRUNCATE TABLE IF EXISTS estrutura_organizacional_completa")
+        logger.info("Data tables truncated successfully.")
+
 def file_already_loaded(ch_client, filename):
     """Check if the CSV file was already loaded successfully in ClickHouse"""
     res = ch_client.query("SELECT count() FROM log_cargas WHERE nome_arquivo = %s", [filename])
@@ -103,11 +108,11 @@ def log_execution(ch_client, filename, duration, rows_count, rows_per_sec):
         column_names=["nome_arquivo", "tempo_carga", "total_linhas", "linhas_por_segundo"]
     )
 
-def load_csv_file(ch_client, s3_client, s3_key, ch_table, columns_list):
-    """Download a CSV file from S3, parse its contents, and insert it into ClickHouse"""
+def load_csv_file(ch_client, s3_client, s3_key, ch_table, target_csv_cols):
+    """Run native ClickHouse S3 loading query for the file"""
     filename = os.path.basename(s3_key)
     
-    # Extract reference year and month from filename (e.g. "distribuicao-orgaos-siorg-2026-07.csv")
+    # Extract reference year and month from filename
     match = re.search(r'-(\d{4})-(\d{2})\.csv', filename)
     if not match:
         logger.warning(f"Skipping file '{filename}'. Could not parse YYYY-MM snapshot date from filename.")
@@ -116,74 +121,74 @@ def load_csv_file(ch_client, s3_client, s3_key, ch_table, columns_list):
     year = int(match.group(1))
     month = int(match.group(2))
     
-    if file_already_loaded(ch_client, filename):
+    # Skip if already loaded, unless TRUNCATE_BEFORE_LOAD=true is enabled
+    if not truncate_before_load and file_already_loaded(ch_client, filename):
         logger.info(f"File '{filename}' has already been loaded previously. Skipping.")
         return
         
     logger.info(f"Starting load for '{filename}' (Snapshot Reference Date: {year:04d}-{month:02d})")
     
-    local_path = os.path.join(TEMP_DIR, filename)
-    os.makedirs(TEMP_DIR, exist_ok=True)
-    
+    # 1. Fetch the first 4KB of the S3 object to parse the headers (takes < 50ms)
+    logger.info(f"Fetching CSV header from S3 for column matching...")
+    try:
+        resp = s3_client.get_object(Bucket=bucket_name, Key=s3_key, Range="bytes=0-4096")
+        first_bytes = resp['Body'].read().decode('utf-8', errors='ignore')
+        header_row = next(csv.reader(first_bytes.splitlines()))
+    except Exception as e:
+        logger.error(f"Failed to read CSV header from S3 for '{filename}': {e}")
+        return
+
+    # Clean up column names in header (remove BOM or spaces if any)
+    cleaned_header = [col.strip().replace('\ufeff', '') for col in header_row]
+
+    # Filter columns to only include those present in both the CSV header and our table definition
+    valid_cols = [col for col in cleaned_header if col in target_csv_cols]
+    if not valid_cols:
+        logger.error(f"No valid matching columns found between CSV header and database schema for '{filename}'.")
+        return
+
+    # Construct regional S3 endpoint url
+    s3_url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
+
+    # Construct high-performance INSERT SELECT query using ClickHouse s3 function
+    insert_cols = ", ".join(valid_cols + ["ano_referencia", "mes_referencia"])
+    select_cols = ", ".join(valid_cols + [f"{year} AS ano_referencia", f"{month} AS mes_referencia"])
+
+    query = f"""
+    INSERT INTO {ch_table} ({insert_cols})
+    SELECT {select_cols}
+    FROM s3(
+        '{s3_url}',
+        '{aws_access_key}',
+        '{aws_secret_key}',
+        'CSVWithNames'
+    )
+    """
+
     start_time = time.time()
     
-    # 1. Download file from S3
-    logger.info(f"Downloading '{s3_key}' from S3...")
-    s3_client.download_file(bucket_name, s3_key, local_path)
-    
-    # 2. Parse CSV and insert into ClickHouse in batches
-    batch_size = 20000
-    batch = []
-    rows_count = 0
-    
-    logger.info(f"Reading and parsing local CSV data...")
-    with open(local_path, "r", encoding="utf-8", errors="ignore") as f:
-        reader = csv.reader(f)
-        header = next(reader) # Skip header row
-        
-        expected_cols_count = len(columns_list) - 2 # Exclude year and month added by python
-        
-        for row in reader:
-            if not row:
-                continue
-                
-            # Basic validation
-            if len(row) != expected_cols_count:
-                logger.warning(f"Row {rows_count + 1} has invalid column count. Expected {expected_cols_count}, got {len(row)}. Skipping row.")
-                continue
-                
-            # Convert empty strings to None (so they become NULL in ClickHouse Nullable fields)
-            processed_row = [val if val != "" else None for val in row]
-            
-            # Append year and month dimensions
-            processed_row.append(year)
-            processed_row.append(month)
-            
-            batch.append(processed_row)
-            rows_count += 1
-            
-            if len(batch) >= batch_size:
-                logger.info(f"Inserting batch of {len(batch)} rows into '{ch_table}'...")
-                ch_client.insert(ch_table, batch, column_names=columns_list)
-                batch = []
-                
-        # Insert remaining rows
-        if batch:
-            logger.info(f"Inserting final batch of {len(batch)} rows into '{ch_table}'...")
-            ch_client.insert(ch_table, batch, column_names=columns_list)
-            
+    logger.info("Executing native S3 loading query inside ClickHouse Cloud...")
+    try:
+        ch_client.command(query)
+    except Exception as e:
+        logger.error(f"ClickHouse S3 loading query failed for '{filename}': {e}")
+        return
+
     end_time = time.time()
     duration = end_time - start_time
+    
+    # Query ClickHouse to find out how many rows were loaded for this snapshot
+    count_res = ch_client.query(
+        f"SELECT count() FROM {ch_table} WHERE ano_referencia = %s AND mes_referencia = %s",
+        [year, month]
+    )
+    rows_count = count_res.result_set[0][0]
     rows_per_sec = rows_count / duration if duration > 0 else 0
     
     logger.info(f"SUCCESS: Loaded {rows_count} rows from '{filename}' into '{ch_table}' in {duration:.2f}s ({rows_per_sec:.2f} rows/sec)")
     
     # 3. Log metadata in ClickHouse
     log_execution(ch_client, filename, duration, rows_count, rows_per_sec)
-    
-    # 4. Clean up local download
-    if os.path.exists(local_path):
-        os.remove(local_path)
 
 def main():
     logger.info("Initializing S3 and ClickHouse Cloud connections...")
@@ -210,6 +215,9 @@ def main():
         # Ensure log table exists
         create_log_table_if_not_exists(ch_client)
         
+        # Truncate tables if requested
+        truncate_tables_if_requested(ch_client)
+        
     except Exception as e:
         logger.error(f"Initialization failed: {e}")
         sys.exit(1)
@@ -230,32 +238,28 @@ def main():
         
     logger.info(f"Found {len(s3_files)} CSV files in S3.")
     
+    # Sort files to ensure chronological order loading if needed
+    s3_files.sort()
+    
     # Process files
     for key in s3_files:
         filename = os.path.basename(key)
         
         if "estrutura-organizacional-completa" in key:
             ch_table = "estrutura_organizacional_completa"
-            columns_list = COMPLETA_COLUMNS
+            target_csv_cols = COMPLETA_CSV_COLS
         elif "distribuicao" in key:
             ch_table = "distribuicao_orgaos"
-            columns_list = DISTRIBUICAO_COLUMNS
+            target_csv_cols = DISTRIBUICAO_CSV_COLS
         else:
             logger.info(f"Ignoring file '{filename}' as it does not match known categories.")
             continue
             
         try:
-            load_csv_file(ch_client, s3_client, key, ch_table, columns_list)
+            load_csv_file(ch_client, s3_client, key, ch_table, target_csv_cols)
         except Exception as ex:
             logger.error(f"Error loading '{filename}': {ex}")
             
-    # Clean up temp folder
-    try:
-        if os.path.exists(TEMP_DIR):
-            os.rmdir(TEMP_DIR)
-    except Exception:
-        pass
-        
     logger.info("Execution complete.")
     ch_client.close()
 
