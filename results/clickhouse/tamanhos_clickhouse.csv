@@ -1,0 +1,5 @@
+﻿"database","table","compressed_size","uncompressed_size",compression_ratio,total_rows
+"SIORG","estrutura_organizacional_completa","519.78 MiB","6.07 GiB",11.95,4023834
+"SIORG","distribuicao_orgaos","133.21 MiB","1.91 GiB",14.7,5351312
+"SIORG","log_cargas","15.52 KiB","79.23 KiB",5.11,1001
+"SIORG","log_consultas","4.33 KiB","90.54 KiB",20.91,108
