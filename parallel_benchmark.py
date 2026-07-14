@@ -184,7 +184,7 @@ def run_concurrency_test():
     logger.info(f"STARTING PARALLEL BENCHMARK (Run ID: {execution_id})")
     logger.info(f"==========================================\n")
 
-    concurrency_levels = [1, 5, 10]
+    concurrency_levels = [1, 5, 10, 20]
     all_results = {}
 
     for c in concurrency_levels:
