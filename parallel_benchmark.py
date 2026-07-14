@@ -4,10 +4,14 @@ import time
 import logging
 import concurrent.futures
 import clickhouse_connect
+from clickhouse_connect.driver import httputil
 from dotenv import load_dotenv
 
 # Load configuration from the absolute path of the .env file
 load_dotenv("c:/Users/lucas/dev/unb-bdm/.env")
+
+# Create a global connection pool manager with maxsize=30
+pool_mgr = httputil.get_pool_manager(maxsize=30)
 
 # Logging Configuration
 logging.basicConfig(
@@ -108,7 +112,8 @@ def execute_and_profile_query(query_name, sql_text, execution_id, concurrency_le
             username=ch_username,
             password=ch_password,
             database=ch_database,
-            secure=True
+            secure=True,
+            pool_mgr=pool_mgr
         )
     except Exception as conn_err:
         logger.error(f"Thread-{thread_index} failed to connect to ClickHouse: {conn_err}")
@@ -170,7 +175,8 @@ def run_concurrency_test():
             username=ch_username,
             password=ch_password,
             database=ch_database,
-            secure=True
+            secure=True,
+            pool_mgr=pool_mgr
         )
         res_max = init_client.query("SELECT max(id_execucao) FROM log_consultas")
         max_id = res_max.result_set[0][0]
