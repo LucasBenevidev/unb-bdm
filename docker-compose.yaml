@@ -1,0 +1,13 @@
+services:
+  trino:
+    image: trinodb/trino:482
+    container_name: unb-trino
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./trino/catalog:/etc/trino/catalog
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_DEFAULT_REGION}
+    restart: unless-stopped

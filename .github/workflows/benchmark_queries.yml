@@ -1,4 +1,4 @@
-name: Benchmark de Consultas SIORG
+﻿name: Benchmark de Consultas SIORG
 
 on:
   workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
@@ -34,12 +34,13 @@ jobs:
           # Run the queries 10 times, incrementing ID per loop
           BENCHMARK_RUNS: "10"
         run: |
-          python benchmark_queries.py
+          python scripts/clickhouse/benchmark_queries.py
 
       - name: Upload Ingestion Log File
         if: always() # Upload logs even if the benchmark fails
         uses: actions/upload-artifact@v4
         with:
           name: siorg-benchmark-logs
-          path: siorg_benchmark.log
+          path: logs/siorg_benchmark.log
           retention-days: 7
+

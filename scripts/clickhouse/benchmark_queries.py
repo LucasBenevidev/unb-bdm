@@ -5,8 +5,9 @@ import logging
 import clickhouse_connect
 from dotenv import load_dotenv
 
-# Load configuration from the absolute path of the .env file
-load_dotenv("c:/Users/lucas/dev/unb-bdm/.env")
+# Load configuration from the repository .env file.
+load_dotenv(".env")
+os.makedirs("logs", exist_ok=True)
 
 # Logging Configuration
 logging.basicConfig(
@@ -14,7 +15,7 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("siorg_benchmark.log", encoding="utf-8")
+        logging.FileHandler("logs/siorg_benchmark.log", encoding="utf-8")
     ]
 )
 logger = logging.getLogger("siorg_benchmarker")

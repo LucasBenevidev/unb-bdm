@@ -1,4 +1,4 @@
-name: Carga de Dados SIORG
+﻿name: Carga de Dados SIORG
 
 on:
   workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
@@ -40,12 +40,13 @@ jobs:
           # Hardcoded to true so it truncates staging tables and loads everything fresh on every run
           TRUNCATE_BEFORE_LOAD: "true"
         run: |
-          python load_s3_to_clickhouse.py
+          python scripts/clickhouse/load_s3_to_clickhouse.py
 
       - name: Upload Ingestion Log File
         if: always() # Upload logs even if the loading script fails
         uses: actions/upload-artifact@v4
         with:
           name: siorg-loading-logs
-          path: siorg_load.log
+          path: logs/siorg_load.log
           retention-days: 7
+

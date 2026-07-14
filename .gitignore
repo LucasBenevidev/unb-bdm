@@ -1,5 +1,12 @@
 .env
 __pycache__/
+.venv/
+.pytest_cache/
 *.zip
 *.csv
 temp_downloads/
+*.log
+logs/
+results/
+.ipynb_checkpoints/
+.aws_trino/

@@ -1,4 +1,4 @@
-import os
+﻿import os
 import re
 import sys
 import shutil
@@ -144,7 +144,7 @@ def main():
         # Test bucket access quickly
         s3_client.get_bucket_location(Bucket=bucket_name)
     except Exception as e:
-        print(f"\nFailed to connect to S3. Please run 'python test_s3_connection.py' first.")
+        print(f"\nFailed to connect to S3. Please run 'python scripts/clickhouse/test_s3_connection.py' first.")
         print(f"Error: {e}")
         sys.exit(1)
         
@@ -230,3 +230,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

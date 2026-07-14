@@ -1,0 +1,8 @@
+boto3
+pandas
+pyarrow
+s3fs
+jupyterlab
+trino
+python-dotenv
+matplotlib
