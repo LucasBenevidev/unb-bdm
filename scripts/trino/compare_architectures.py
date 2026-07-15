@@ -19,6 +19,11 @@ logger = setup_logging("compare_architectures")
 CLICKHOUSE_DIR = Path("results") / "clickhouse"
 TRINO_DIR = Path("results") / "trino"
 COMPARE_DIR = Path("results") / "comparison"
+QUERY_NAMES = {
+    "q01": "Expansao do Estado (Window Functions)",
+    "q02": "Relocalizacoes Geograficas de Setores (Self-Join Historico)",
+    "q03": "Serie Historica de Complexidade (Agrupamento por Orgao)",
+}
 
 
 def percentile(series: pd.Series, q: float) -> float:
@@ -27,12 +32,23 @@ def percentile(series: pd.Series, q: float) -> float:
     return float(series.quantile(q))
 
 
+def read_csv_with_fallback(path: Path) -> pd.DataFrame:
+    for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin1"):
+        try:
+            return pd.read_csv(path, encoding=encoding)
+        except UnicodeDecodeError:
+            continue
+    return pd.read_csv(path, encoding="latin1")
+
+
 def summarize_ingestion(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
 
-    ch_path = clickhouse_dir / "log_carga.csv"
+    ch_path = clickhouse_dir / "log_cargas.csv"
+    if not ch_path.exists():
+        ch_path = clickhouse_dir / "log_carga.csv"
     if ch_path.exists():
-        ch = pd.read_csv(ch_path)
+        ch = read_csv_with_fallback(ch_path)
         complete = ch.groupby("id_execucao").filter(lambda group: len(group) == 91)
         per_run = (
             complete.groupby("id_execucao")
@@ -58,7 +74,7 @@ def summarize_ingestion(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
 
     trino_path = trino_dir / "load_log.csv"
     if trino_path.exists():
-        trino = pd.read_csv(trino_path)
+        trino = read_csv_with_fallback(trino_path)
         if "status" in trino.columns:
             trino = trino[trino["status"].str.lower() == "success"]
         complete = trino.groupby("id_execucao").filter(lambda group: len(group) == 91)
@@ -102,18 +118,21 @@ def summarize_queries(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
 
     ch_path = clickhouse_dir / "log_consultas.csv"
     if ch_path.exists():
-        ch = pd.read_csv(ch_path)
+        ch = read_csv_with_fallback(ch_path)
         ch["query_id_norm"] = ch["query_name"].map(normalize_query_id)
         ch = ch[ch["result_rows"] > 0]
-        for query_id, group in ch.groupby("query_id_norm"):
+        if "concurrency_level" not in ch.columns:
+            ch["concurrency_level"] = 1
+        for keys, group in ch.groupby(["concurrency_level", "query_id_norm"]):
+            users, query_id = keys
             durations = group["elapsed_seconds"].astype(float)
             rows.append(
                 {
                     "engine": clickhouse_dir.name,
-                    "usuarios": 1,
-                    "modo": "sequential",
+                    "usuarios": int(users),
+                    "modo": "mixed-workload" if int(users) > 1 else "sequential",
                     "query_id": query_id,
-                    "query_name": group["query_name"].iloc[-1],
+                    "query_name": QUERY_NAMES.get(query_id, group["query_name"].iloc[-1]),
                     "count": len(group),
                     "mean": durations.mean(),
                     "min": durations.min(),
@@ -129,7 +148,7 @@ def summarize_queries(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
 
     trino_path = trino_dir / "query_log.csv"
     if trino_path.exists():
-        trino = pd.read_csv(trino_path)
+        trino = read_csv_with_fallback(trino_path)
         if "status" in trino.columns:
             trino = trino[trino["status"].str.lower() == "success"]
         trino = trino[trino["linhas_retornadas"] > 0]
@@ -149,7 +168,7 @@ def summarize_queries(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
                     "usuarios": int(users),
                     "modo": mode,
                     "query_id": query_id,
-                    "query_name": group["query_name"].iloc[-1],
+                    "query_name": QUERY_NAMES.get(query_id, group["query_name"].iloc[-1]),
                     "count": len(group),
                     "mean": durations.mean(),
                     "min": durations.min(),
@@ -166,21 +185,75 @@ def summarize_queries(clickhouse_dir: Path, trino_dir: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def parse_size_to_bytes(value: Any) -> int:
+    text = str(value).strip()
+    if not text:
+        return 0
+    parts = text.split()
+    number = float(parts[0].replace(",", "."))
+    unit = parts[1].lower() if len(parts) > 1 else "b"
+    multipliers = {
+        "b": 1,
+        "bytes": 1,
+        "kib": 1024,
+        "kb": 1024,
+        "mib": 1024**2,
+        "mb": 1024**2,
+        "gib": 1024**3,
+        "gb": 1024**3,
+        "tib": 1024**4,
+        "tb": 1024**4,
+    }
+    return int(number * multipliers.get(unit, 1))
+
+
+def collect_clickhouse_storage(clickhouse_dir: Path) -> pd.DataFrame:
+    path = clickhouse_dir / "tamanhos_clickhouse.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    data = read_csv_with_fallback(path)
+    data = data[data["table"].isin(["distribuicao_orgaos", "estrutura_organizacional_completa"])]
+    rows = []
+    for _, row in data.iterrows():
+        compressed_bytes = parse_size_to_bytes(row["compressed_size"])
+        uncompressed_bytes = parse_size_to_bytes(row["uncompressed_size"])
+        rows.append(
+            {
+                "engine": clickhouse_dir.name,
+                "run_id": "",
+                "table": row["table"],
+                "data_files": "",
+                "compressed_bytes": compressed_bytes,
+                "compressed_mib": compressed_bytes / 1024 / 1024,
+                "uncompressed_bytes": uncompressed_bytes,
+                "uncompressed_mib": uncompressed_bytes / 1024 / 1024,
+                "compression_ratio": float(row["compression_ratio"]),
+                "source_csv_bytes": "",
+                "csv_to_engine_ratio": "",
+                "total_rows": int(row["total_rows"]),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def collect_trino_storage(trino_dir: Path) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     summary_path = trino_dir / "storage_summary.csv"
     if summary_path.exists():
-        storage = pd.read_csv(summary_path)
+        storage = read_csv_with_fallback(summary_path)
         if "engine" not in storage.columns:
             storage.insert(0, "engine", trino_dir.name)
         else:
             storage["engine"] = trino_dir.name
+        storage = storage.rename(columns={"parquet_files": "data_files", "csv_to_parquet_ratio": "csv_to_engine_ratio"})
+        if "total_rows" not in storage.columns:
+            storage["total_rows"] = ""
         return storage
     trino_path = trino_dir / "load_log.csv"
     if not trino_path.exists():
         return pd.DataFrame(rows)
     try:
-        logs = pd.read_csv(trino_path)
+        logs = read_csv_with_fallback(trino_path)
         if "status" in logs.columns:
             logs = logs[logs["status"].str.lower() == "success"]
         complete_ids = logs.groupby("id_execucao").filter(lambda group: len(group) == 91)["id_execucao"]
@@ -267,9 +340,9 @@ def write_markdown(ingestion: pd.DataFrame, queries: pd.DataFrame, storage: pd.D
             "",
             "## Observacoes",
             "",
-            "- Os resultados ClickHouse disponiveis possuem ingestao completa e consultas sequenciais.",
+            "- A ingestao ClickHouse usa `log_cargas.csv` quando disponivel; `log_carga.csv` e usado apenas como fallback legado.",
+            "- As consultas sao agrupadas por `concurrency_level` no ClickHouse e por `usuarios` no Trino.",
             "- A comparacao filtra consultas Trino com cardinalidade final equivalente ao ClickHouse.",
-            "- Para a comparacao final do trabalho, use `results/clickhouse_fixed` e `results/trino_aws_fixed`.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -314,7 +387,14 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     ingestion = summarize_ingestion(clickhouse_dir, trino_dir)
     queries = summarize_queries(clickhouse_dir, trino_dir)
-    storage = pd.DataFrame() if args.skip_storage else collect_trino_storage(trino_dir)
+    if args.skip_storage:
+        storage = pd.DataFrame()
+    else:
+        storage = pd.concat(
+            [collect_clickhouse_storage(clickhouse_dir), collect_trino_storage(trino_dir)],
+            ignore_index=True,
+            sort=False,
+        )
 
     ingestion.to_csv(output_dir / "ingestion_summary.csv", index=False)
     queries.to_csv(output_dir / "query_comparison_summary.csv", index=False)

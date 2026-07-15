@@ -1,0 +1,368 @@
+=== ENV ===
+2026-07-14T18:54:21+00:00
+Linux ip-172-31-42-153 6.8.0-1060-aws #63~22.04.1-Ubuntu SMP Tue Jun 30 02:32:53 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+nproc=8
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       1.4Gi        24Gi       3.0Mi       4.8Gi        28Gi
+Swap:             0B          0B          0B
+Docker version 29.1.3, build 29.1.3-0ubuntu3~22.04.2
+docker-compose version 1.29.2, build unknown
+CONTAINER ID   IMAGE               COMMAND                  CREATED         STATUS                   PORTS                                         NAMES
+31f9466470fd   trinodb/trino:482   "/usr/lib/trino/bin/…"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:8090->8080/tcp, [::]:8090->8080/tcp   unb-trino
+=== CREATE TABLES ===
+2026-07-14 18:54:22,112 [INFO] Executando SQL: CREATE SCHEMA IF NOT EXISTS iceberg.siorg WITH (location = 's3://unb-bdm-siorg/iceberg/siorg/')
+2026-07-14 18:54:22,205 [INFO] Executando SQL: CREATE TABLE IF NOT EXISTS iceberg.siorg."distribuicao_orgaos" ( "nivel_hierarquico" VARCHAR, "cod_orgao_entidade" VARCHAR, "nome_orgao_entidade" VARCHAR, "sigla_orgao_entidade" VARCHAR, "natureza_juridica" VARCHAR, "subnatureza_juridica" V
+2026-07-14 18:54:22,502 [INFO] Tabela verificada/criada: distribuicao_orgaos
+2026-07-14 18:54:22,502 [INFO] Executando SQL: CREATE TABLE IF NOT EXISTS iceberg.siorg."estrutura_organizacional_completa" ( "codigoUnidade" VARCHAR, "codigoUnidadePai" VARCHAR, "codigoOrgaoEntidade" VARCHAR, "codigoTipoUnidade" VARCHAR, "nome" VARCHAR, "sigla" VARCHAR, "codigoEsfera" 
+2026-07-14 18:54:22,718 [INFO] Tabela verificada/criada: estrutura_organizacional_completa
+2026-07-14 18:54:22,718 [INFO] Executando SQL: CREATE TABLE IF NOT EXISTS iceberg.siorg."load_log" ( id_execucao INTEGER, data_execucao TIMESTAMP(6), engine VARCHAR, arquivo VARCHAR, tabela VARCHAR, duracao_segundos DOUBLE, total_linhas BIGINT, linhas_por_segundo DOUBLE, bytes_origem BI
+2026-07-14 18:54:22,983 [INFO] Executando SQL: CREATE TABLE IF NOT EXISTS iceberg.siorg."query_log" ( id_execucao INTEGER, data_execucao TIMESTAMP(6), engine VARCHAR, query_id VARCHAR, query_name VARCHAR, trino_query_id VARCHAR, duracao_segundos DOUBLE, linhas_retornadas BIGINT, usuario
+2026-07-14 18:54:23,148 [INFO] Tabelas de log verificadas/criadas.
+=== LOAD RECREATE ===
+2026-07-14 18:54:23,597 [INFO] Modo recreate: removendo e recriando tabelas de dados Iceberg.
+2026-07-14 18:54:39,329 [INFO] id_execucao atribuido: 3
+2026-07-14 18:54:39,498 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2022-08.csv em distribuicao_orgaos
+2026-07-14 18:54:43,185 [INFO] SUCCESS: 115143 linhas em 2.56s (distribuicao/distribuicao-orgaos-siorg-2022-08.csv)
+2026-07-14 18:54:43,185 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2022-09.csv em distribuicao_orgaos
+2026-07-14 18:54:46,179 [INFO] SUCCESS: 115135 linhas em 2.29s (distribuicao/distribuicao-orgaos-siorg-2022-09.csv)
+2026-07-14 18:54:46,179 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2022-10.csv em distribuicao_orgaos
+2026-07-14 18:54:49,552 [INFO] SUCCESS: 113318 linhas em 2.59s (distribuicao/distribuicao-orgaos-siorg-2022-10.csv)
+2026-07-14 18:54:49,553 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2022-11.csv em distribuicao_orgaos
+2026-07-14 18:54:52,746 [INFO] SUCCESS: 111819 linhas em 2.48s (distribuicao/distribuicao-orgaos-siorg-2022-11.csv)
+2026-07-14 18:54:52,746 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2022-12.csv em distribuicao_orgaos
+2026-07-14 18:54:56,060 [INFO] SUCCESS: 112633 linhas em 2.38s (distribuicao/distribuicao-orgaos-siorg-2022-12.csv)
+2026-07-14 18:54:56,061 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-01.csv em distribuicao_orgaos
+2026-07-14 18:54:59,489 [INFO] SUCCESS: 112625 linhas em 2.62s (distribuicao/distribuicao-orgaos-siorg-2023-01.csv)
+2026-07-14 18:54:59,489 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-02.csv em distribuicao_orgaos
+2026-07-14 18:55:02,591 [INFO] SUCCESS: 111819 linhas em 2.30s (distribuicao/distribuicao-orgaos-siorg-2023-02.csv)
+2026-07-14 18:55:02,591 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-03.csv em distribuicao_orgaos
+2026-07-14 18:55:06,474 [INFO] SUCCESS: 111819 linhas em 2.77s (distribuicao/distribuicao-orgaos-siorg-2023-03.csv)
+2026-07-14 18:55:06,474 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-04.csv em distribuicao_orgaos
+2026-07-14 18:55:09,981 [INFO] SUCCESS: 111819 linhas em 2.65s (distribuicao/distribuicao-orgaos-siorg-2023-04.csv)
+2026-07-14 18:55:09,981 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-05.csv em distribuicao_orgaos
+2026-07-14 18:55:13,450 [INFO] SUCCESS: 111848 linhas em 2.63s (distribuicao/distribuicao-orgaos-siorg-2023-05.csv)
+2026-07-14 18:55:13,450 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-06.csv em distribuicao_orgaos
+2026-07-14 18:55:16,790 [INFO] SUCCESS: 111746 linhas em 2.40s (distribuicao/distribuicao-orgaos-siorg-2023-06.csv)
+2026-07-14 18:55:16,790 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-07.csv em distribuicao_orgaos
+2026-07-14 18:55:20,085 [INFO] SUCCESS: 119274 linhas em 2.55s (distribuicao/distribuicao-orgaos-siorg-2023-07.csv)
+2026-07-14 18:55:20,085 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-08.csv em distribuicao_orgaos
+2026-07-14 18:55:23,433 [INFO] SUCCESS: 119174 linhas em 2.58s (distribuicao/distribuicao-orgaos-siorg-2023-08.csv)
+2026-07-14 18:55:23,434 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-09.csv em distribuicao_orgaos
+2026-07-14 18:55:27,066 [INFO] SUCCESS: 119125 linhas em 2.63s (distribuicao/distribuicao-orgaos-siorg-2023-09.csv)
+2026-07-14 18:55:27,066 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-10.csv em distribuicao_orgaos
+2026-07-14 18:55:31,106 [INFO] SUCCESS: 119152 linhas em 3.07s (distribuicao/distribuicao-orgaos-siorg-2023-10.csv)
+2026-07-14 18:55:31,106 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-11.csv em distribuicao_orgaos
+2026-07-14 18:55:34,294 [INFO] SUCCESS: 119614 linhas em 2.40s (distribuicao/distribuicao-orgaos-siorg-2023-11.csv)
+2026-07-14 18:55:34,295 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2023-12.csv em distribuicao_orgaos
+2026-07-14 18:55:38,080 [INFO] SUCCESS: 119639 linhas em 2.88s (distribuicao/distribuicao-orgaos-siorg-2023-12.csv)
+2026-07-14 18:55:38,080 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-01.csv em distribuicao_orgaos
+2026-07-14 18:55:41,562 [INFO] SUCCESS: 119654 linhas em 2.59s (distribuicao/distribuicao-orgaos-siorg-2024-01.csv)
+2026-07-14 18:55:41,562 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-03.csv em distribuicao_orgaos
+2026-07-14 18:55:44,784 [INFO] SUCCESS: 119932 linhas em 2.49s (distribuicao/distribuicao-orgaos-siorg-2024-03.csv)
+2026-07-14 18:55:44,784 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-04.csv em distribuicao_orgaos
+2026-07-14 18:55:48,004 [INFO] SUCCESS: 118564 linhas em 2.42s (distribuicao/distribuicao-orgaos-siorg-2024-04.csv)
+2026-07-14 18:55:48,004 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-05.csv em distribuicao_orgaos
+2026-07-14 18:55:50,865 [INFO] SUCCESS: 118467 linhas em 2.12s (distribuicao/distribuicao-orgaos-siorg-2024-05.csv)
+2026-07-14 18:55:50,865 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-06.csv em distribuicao_orgaos
+2026-07-14 18:55:54,684 [INFO] SUCCESS: 118679 linhas em 2.97s (distribuicao/distribuicao-orgaos-siorg-2024-06.csv)
+2026-07-14 18:55:54,684 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-07.csv em distribuicao_orgaos
+2026-07-14 18:55:57,978 [INFO] SUCCESS: 118752 linhas em 2.54s (distribuicao/distribuicao-orgaos-siorg-2024-07.csv)
+2026-07-14 18:55:57,979 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-09.csv em distribuicao_orgaos
+2026-07-14 18:56:01,059 [INFO] SUCCESS: 118872 linhas em 2.35s (distribuicao/distribuicao-orgaos-siorg-2024-09.csv)
+2026-07-14 18:56:01,060 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-10.csv em distribuicao_orgaos
+2026-07-14 18:56:04,106 [INFO] SUCCESS: 119191 linhas em 2.29s (distribuicao/distribuicao-orgaos-siorg-2024-10.csv)
+2026-07-14 18:56:04,107 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-11.csv em distribuicao_orgaos
+2026-07-14 18:56:07,852 [INFO] SUCCESS: 119338 linhas em 2.78s (distribuicao/distribuicao-orgaos-siorg-2024-11.csv)
+2026-07-14 18:56:07,852 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2024-12.csv em distribuicao_orgaos
+2026-07-14 18:56:11,244 [INFO] SUCCESS: 119407 linhas em 2.57s (distribuicao/distribuicao-orgaos-siorg-2024-12.csv)
+2026-07-14 18:56:11,244 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-01.csv em distribuicao_orgaos
+2026-07-14 18:56:14,272 [INFO] SUCCESS: 119610 linhas em 2.26s (distribuicao/distribuicao-orgaos-siorg-2025-01.csv)
+2026-07-14 18:56:14,272 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-02.csv em distribuicao_orgaos
+2026-07-14 18:56:17,251 [INFO] SUCCESS: 119566 linhas em 2.26s (distribuicao/distribuicao-orgaos-siorg-2025-02.csv)
+2026-07-14 18:56:17,251 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-03.csv em distribuicao_orgaos
+2026-07-14 18:56:20,434 [INFO] SUCCESS: 119576 linhas em 2.34s (distribuicao/distribuicao-orgaos-siorg-2025-03.csv)
+2026-07-14 18:56:20,434 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-04.csv em distribuicao_orgaos
+2026-07-14 18:56:23,910 [INFO] SUCCESS: 119577 linhas em 2.49s (distribuicao/distribuicao-orgaos-siorg-2025-04.csv)
+2026-07-14 18:56:23,911 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-05.csv em distribuicao_orgaos
+2026-07-14 18:56:27,154 [INFO] SUCCESS: 119586 linhas em 2.36s (distribuicao/distribuicao-orgaos-siorg-2025-05.csv)
+2026-07-14 18:56:27,154 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-06.csv em distribuicao_orgaos
+2026-07-14 18:56:30,120 [INFO] SUCCESS: 119640 linhas em 2.11s (distribuicao/distribuicao-orgaos-siorg-2025-06.csv)
+2026-07-14 18:56:30,120 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-07.csv em distribuicao_orgaos
+2026-07-14 18:56:33,222 [INFO] SUCCESS: 119994 linhas em 2.38s (distribuicao/distribuicao-orgaos-siorg-2025-07.csv)
+2026-07-14 18:56:33,223 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-08.csv em distribuicao_orgaos
+2026-07-14 18:56:36,554 [INFO] SUCCESS: 120435 linhas em 2.59s (distribuicao/distribuicao-orgaos-siorg-2025-08.csv)
+2026-07-14 18:56:36,554 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-10.csv em distribuicao_orgaos
+2026-07-14 18:56:40,118 [INFO] SUCCESS: 120862 linhas em 2.69s (distribuicao/distribuicao-orgaos-siorg-2025-10.csv)
+2026-07-14 18:56:40,118 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-11.csv em distribuicao_orgaos
+2026-07-14 18:56:43,776 [INFO] SUCCESS: 121929 linhas em 2.70s (distribuicao/distribuicao-orgaos-siorg-2025-11.csv)
+2026-07-14 18:56:43,776 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2025-12.csv em distribuicao_orgaos
+2026-07-14 18:56:47,762 [INFO] SUCCESS: 122047 linhas em 3.24s (distribuicao/distribuicao-orgaos-siorg-2025-12.csv)
+2026-07-14 18:56:47,762 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-01.csv em distribuicao_orgaos
+2026-07-14 18:56:51,188 [INFO] SUCCESS: 125548 linhas em 2.49s (distribuicao/distribuicao-orgaos-siorg-2026-01.csv)
+2026-07-14 18:56:51,189 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-02.csv em distribuicao_orgaos
+2026-07-14 18:56:54,775 [INFO] SUCCESS: 125571 linhas em 2.72s (distribuicao/distribuicao-orgaos-siorg-2026-02.csv)
+2026-07-14 18:56:54,775 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-03.csv em distribuicao_orgaos
+2026-07-14 18:56:58,420 [INFO] SUCCESS: 125510 linhas em 2.51s (distribuicao/distribuicao-orgaos-siorg-2026-03.csv)
+2026-07-14 18:56:58,420 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-04.csv em distribuicao_orgaos
+2026-07-14 18:57:01,886 [INFO] SUCCESS: 125469 linhas em 2.68s (distribuicao/distribuicao-orgaos-siorg-2026-04.csv)
+2026-07-14 18:57:01,886 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-05.csv em distribuicao_orgaos
+2026-07-14 18:57:05,012 [INFO] SUCCESS: 125714 linhas em 2.30s (distribuicao/distribuicao-orgaos-siorg-2026-05.csv)
+2026-07-14 18:57:05,012 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-06.csv em distribuicao_orgaos
+2026-07-14 18:57:08,357 [INFO] SUCCESS: 126862 linhas em 2.59s (distribuicao/distribuicao-orgaos-siorg-2026-06.csv)
+2026-07-14 18:57:08,357 [INFO] Carregando distribuicao/distribuicao-orgaos-siorg-2026-07.csv em distribuicao_orgaos
+2026-07-14 18:57:11,888 [INFO] SUCCESS: 127258 linhas em 2.81s (distribuicao/distribuicao-orgaos-siorg-2026-07.csv)
+2026-07-14 18:57:11,889 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2022-08.csv em estrutura_organizacional_completa
+2026-07-14 18:57:18,279 [INFO] SUCCESS: 79439 linhas em 5.71s (estrutura-organizacional-completa/estrutura-organizacional-completa-2022-08.csv)
+2026-07-14 18:57:18,279 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2022-09.csv em estrutura_organizacional_completa
+2026-07-14 18:57:23,440 [INFO] SUCCESS: 79502 linhas em 4.33s (estrutura-organizacional-completa/estrutura-organizacional-completa-2022-09.csv)
+2026-07-14 18:57:23,440 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2022-10.csv em estrutura_organizacional_completa
+2026-07-14 18:57:29,467 [INFO] SUCCESS: 80603 linhas em 5.33s (estrutura-organizacional-completa/estrutura-organizacional-completa-2022-10.csv)
+2026-07-14 18:57:29,467 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2022-11.csv em estrutura_organizacional_completa
+2026-07-14 18:57:36,172 [INFO] SUCCESS: 83034 linhas em 5.82s (estrutura-organizacional-completa/estrutura-organizacional-completa-2022-11.csv)
+2026-07-14 18:57:36,172 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2022-12.csv em estrutura_organizacional_completa
+2026-07-14 18:57:41,932 [INFO] SUCCESS: 83034 linhas em 5.03s (estrutura-organizacional-completa/estrutura-organizacional-completa-2022-12.csv)
+2026-07-14 18:57:41,932 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-01.csv em estrutura_organizacional_completa
+2026-07-14 18:57:47,635 [INFO] SUCCESS: 83034 linhas em 4.98s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-01.csv)
+2026-07-14 18:57:47,635 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-02.csv em estrutura_organizacional_completa
+2026-07-14 18:57:53,930 [INFO] SUCCESS: 83034 linhas em 5.48s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-02.csv)
+2026-07-14 18:57:53,931 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-03.csv em estrutura_organizacional_completa
+2026-07-14 18:58:00,255 [INFO] SUCCESS: 83034 linhas em 5.67s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-03.csv)
+2026-07-14 18:58:00,255 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-04.csv em estrutura_organizacional_completa
+2026-07-14 18:58:07,389 [INFO] SUCCESS: 83034 linhas em 6.28s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-04.csv)
+2026-07-14 18:58:07,389 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-05.csv em estrutura_organizacional_completa
+2026-07-14 18:58:13,934 [INFO] SUCCESS: 83166 linhas em 5.83s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-05.csv)
+2026-07-14 18:58:13,934 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-06.csv em estrutura_organizacional_completa
+2026-07-14 18:58:21,532 [INFO] SUCCESS: 83277 linhas em 6.84s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-06.csv)
+2026-07-14 18:58:21,532 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-07.csv em estrutura_organizacional_completa
+2026-07-14 18:58:28,179 [INFO] SUCCESS: 83295 linhas em 5.80s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-07.csv)
+2026-07-14 18:58:28,180 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-08.csv em estrutura_organizacional_completa
+2026-07-14 18:58:35,080 [INFO] SUCCESS: 83503 linhas em 6.16s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-08.csv)
+2026-07-14 18:58:35,080 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-09.csv em estrutura_organizacional_completa
+2026-07-14 18:58:41,296 [INFO] SUCCESS: 83665 linhas em 5.42s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-09.csv)
+2026-07-14 18:58:41,296 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-10.csv em estrutura_organizacional_completa
+2026-07-14 18:58:47,857 [INFO] SUCCESS: 83765 linhas em 5.84s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-10.csv)
+2026-07-14 18:58:47,857 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-11.csv em estrutura_organizacional_completa
+2026-07-14 18:58:54,012 [INFO] SUCCESS: 85064 linhas em 5.39s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-11.csv)
+2026-07-14 18:58:54,012 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2023-12.csv em estrutura_organizacional_completa
+2026-07-14 18:59:01,107 [INFO] SUCCESS: 85412 linhas em 6.24s (estrutura-organizacional-completa/estrutura-organizacional-completa-2023-12.csv)
+2026-07-14 18:59:01,107 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-01.csv em estrutura_organizacional_completa
+2026-07-14 18:59:07,556 [INFO] SUCCESS: 85523 linhas em 5.70s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-01.csv)
+2026-07-14 18:59:07,556 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-02.csv em estrutura_organizacional_completa
+2026-07-14 18:59:13,686 [INFO] SUCCESS: 86174 linhas em 5.39s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-02.csv)
+2026-07-14 18:59:13,686 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-03.csv em estrutura_organizacional_completa
+2026-07-14 18:59:20,501 [INFO] SUCCESS: 86557 linhas em 6.03s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-03.csv)
+2026-07-14 18:59:20,501 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-04.csv em estrutura_organizacional_completa
+2026-07-14 18:59:27,659 [INFO] SUCCESS: 86630 linhas em 6.30s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-04.csv)
+2026-07-14 18:59:27,659 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-05.csv em estrutura_organizacional_completa
+2026-07-14 18:59:34,325 [INFO] SUCCESS: 87134 linhas em 5.75s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-05.csv)
+2026-07-14 18:59:34,326 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-06.csv em estrutura_organizacional_completa
+2026-07-14 18:59:40,824 [INFO] SUCCESS: 87509 linhas em 5.54s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-06.csv)
+2026-07-14 18:59:40,825 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-07.csv em estrutura_organizacional_completa
+2026-07-14 18:59:47,110 [INFO] SUCCESS: 87711 linhas em 5.41s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-07.csv)
+2026-07-14 18:59:47,110 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-09.csv em estrutura_organizacional_completa
+2026-07-14 18:59:54,697 [INFO] SUCCESS: 88128 linhas em 6.63s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-09.csv)
+2026-07-14 18:59:54,697 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-10.csv em estrutura_organizacional_completa
+2026-07-14 19:00:02,703 [INFO] SUCCESS: 88314 linhas em 7.06s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-10.csv)
+2026-07-14 19:00:02,703 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-11.csv em estrutura_organizacional_completa
+2026-07-14 19:00:09,387 [INFO] SUCCESS: 88488 linhas em 5.78s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-11.csv)
+2026-07-14 19:00:09,387 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2024-12.csv em estrutura_organizacional_completa
+2026-07-14 19:00:16,749 [INFO] SUCCESS: 88579 linhas em 6.41s (estrutura-organizacional-completa/estrutura-organizacional-completa-2024-12.csv)
+2026-07-14 19:00:16,749 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-01.csv em estrutura_organizacional_completa
+2026-07-14 19:00:25,316 [INFO] SUCCESS: 89059 linhas em 7.72s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-01.csv)
+2026-07-14 19:00:25,316 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-02.csv em estrutura_organizacional_completa
+2026-07-14 19:00:32,850 [INFO] SUCCESS: 89069 linhas em 6.71s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-02.csv)
+2026-07-14 19:00:32,851 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-03.csv em estrutura_organizacional_completa
+2026-07-14 19:00:40,933 [INFO] SUCCESS: 89244 linhas em 7.12s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-03.csv)
+2026-07-14 19:00:40,933 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-04.csv em estrutura_organizacional_completa
+2026-07-14 19:00:49,869 [INFO] SUCCESS: 89508 linhas em 7.68s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-04.csv)
+2026-07-14 19:00:49,869 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-05.csv em estrutura_organizacional_completa
+2026-07-14 19:00:57,292 [INFO] SUCCESS: 89782 linhas em 6.59s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-05.csv)
+2026-07-14 19:00:57,292 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-06.csv em estrutura_organizacional_completa
+2026-07-14 19:01:05,422 [INFO] SUCCESS: 89973 linhas em 7.47s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-06.csv)
+2026-07-14 19:01:05,422 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-07.csv em estrutura_organizacional_completa
+2026-07-14 19:01:13,866 [INFO] SUCCESS: 90017 linhas em 7.57s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-07.csv)
+2026-07-14 19:01:13,866 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-08.csv em estrutura_organizacional_completa
+2026-07-14 19:01:22,485 [INFO] SUCCESS: 90970 linhas em 7.59s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-08.csv)
+2026-07-14 19:01:22,485 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-10.csv em estrutura_organizacional_completa
+2026-07-14 19:01:30,092 [INFO] SUCCESS: 91456 linhas em 6.58s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-10.csv)
+2026-07-14 19:01:30,092 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-11.csv em estrutura_organizacional_completa
+2026-07-14 19:01:39,420 [INFO] SUCCESS: 91580 linhas em 8.53s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-11.csv)
+2026-07-14 19:01:39,420 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2025-12.csv em estrutura_organizacional_completa
+2026-07-14 19:01:47,318 [INFO] SUCCESS: 92002 linhas em 7.20s (estrutura-organizacional-completa/estrutura-organizacional-completa-2025-12.csv)
+2026-07-14 19:01:47,318 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-01.csv em estrutura_organizacional_completa
+2026-07-14 19:01:55,360 [INFO] SUCCESS: 93133 linhas em 7.13s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-01.csv)
+2026-07-14 19:01:55,360 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-02.csv em estrutura_organizacional_completa
+2026-07-14 19:02:04,014 [INFO] SUCCESS: 93561 linhas em 7.56s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-02.csv)
+2026-07-14 19:02:04,014 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-03.csv em estrutura_organizacional_completa
+2026-07-14 19:02:12,003 [INFO] SUCCESS: 94058 linhas em 7.15s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-03.csv)
+2026-07-14 19:02:12,003 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-04.csv em estrutura_organizacional_completa
+2026-07-14 19:02:19,594 [INFO] SUCCESS: 94485 linhas em 6.78s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-04.csv)
+2026-07-14 19:02:19,594 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-05.csv em estrutura_organizacional_completa
+2026-07-14 19:02:26,621 [INFO] SUCCESS: 94959 linhas em 6.28s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-05.csv)
+2026-07-14 19:02:26,621 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-06.csv em estrutura_organizacional_completa
+2026-07-14 19:02:35,218 [INFO] SUCCESS: 95494 linhas em 7.68s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-06.csv)
+2026-07-14 19:02:35,218 [INFO] Carregando estrutura-organizacional-completa/estrutura-organizacional-completa-2026-07.csv em estrutura_organizacional_completa
+2026-07-14 19:02:43,123 [INFO] SUCCESS: 95842 linhas em 7.13s (estrutura-organizacional-completa/estrutura-organizacional-completa-2026-07.csv)
+=== VALIDATE ===
+2026-07-14 19:02:43,835 [INFO] distribuicao_orgaos.total_linhas = 5351312
+2026-07-14 19:02:44,153 [INFO] distribuicao_orgaos.arquivos_carregados = 45
+2026-07-14 19:02:44,763 [INFO] distribuicao_orgaos.competencia_minima = 2022-08-01
+2026-07-14 19:02:45,036 [INFO] distribuicao_orgaos.competencia_maxima = 2026-07-01
+2026-07-14 19:02:45,197 [INFO] distribuicao_orgaos.source_file_nulo = 0
+2026-07-14 19:02:45,310 [INFO] distribuicao_orgaos.cod_unidade_nulo = 0
+2026-07-14 19:02:47,901 [INFO] distribuicao_orgaos.duplicidades_cod_unidade_competencia = 413119
+2026-07-14 19:02:48,115 [INFO] estrutura_organizacional_completa.total_linhas = 4023834
+2026-07-14 19:02:49,800 [INFO] estrutura_organizacional_completa.arquivos_carregados = 46
+2026-07-14 19:02:50,686 [INFO] estrutura_organizacional_completa.competencia_minima = 2022-08-01
+2026-07-14 19:02:51,439 [INFO] estrutura_organizacional_completa.competencia_maxima = 2026-07-01
+2026-07-14 19:02:51,585 [INFO] estrutura_organizacional_completa.source_file_nulo = 0
+2026-07-14 19:02:51,725 [INFO] estrutura_organizacional_completa.codigoUnidade_nulo = 0
+2026-07-14 19:02:53,826 [INFO] estrutura_organizacional_completa.duplicidades_codigoUnidade_competencia = 0
+2026-07-14 19:02:53,826 [INFO] Relatorio de validacao gravado em results/trino/validation_report.csv
+=== BENCHMARK users=1 ===
+2026-07-14 19:02:54,006 [INFO] Iniciando benchmark id_execucao=1 usuarios=1 modo=mixed-workload repeticoes=1
+2026-07-14 19:03:01,629 [INFO] Usuario virtual 1 finalizou 3 consulta(s).
+2026-07-14 19:03:01,629 [INFO] Logs gravados em results/trino
+=== BENCHMARK users=5 ===
+2026-07-14 19:03:01,806 [INFO] Iniciando benchmark id_execucao=2 usuarios=5 modo=mixed-workload repeticoes=1
+2026-07-14 19:03:21,275 [INFO] Usuario virtual 1 finalizou 3 consulta(s).
+2026-07-14 19:03:21,312 [INFO] Usuario virtual 4 finalizou 3 consulta(s).
+2026-07-14 19:03:21,654 [INFO] Usuario virtual 3 finalizou 3 consulta(s).
+2026-07-14 19:03:21,733 [INFO] Usuario virtual 5 finalizou 3 consulta(s).
+2026-07-14 19:03:21,734 [INFO] Usuario virtual 2 finalizou 3 consulta(s).
+2026-07-14 19:03:21,735 [INFO] Logs gravados em results/trino
+=== BENCHMARK users=10 ===
+2026-07-14 19:03:21,915 [INFO] Iniciando benchmark id_execucao=3 usuarios=10 modo=mixed-workload repeticoes=1
+2026-07-14 19:04:03,576 [INFO] Usuario virtual 5 finalizou 3 consulta(s).
+2026-07-14 19:04:03,885 [INFO] Usuario virtual 8 finalizou 3 consulta(s).
+2026-07-14 19:04:03,950 [INFO] Usuario virtual 2 finalizou 3 consulta(s).
+2026-07-14 19:04:03,953 [INFO] Usuario virtual 4 finalizou 3 consulta(s).
+2026-07-14 19:04:03,956 [INFO] Usuario virtual 1 finalizou 3 consulta(s).
+2026-07-14 19:04:03,974 [INFO] Usuario virtual 9 finalizou 3 consulta(s).
+2026-07-14 19:04:04,070 [INFO] Usuario virtual 6 finalizou 3 consulta(s).
+2026-07-14 19:04:04,103 [INFO] Usuario virtual 10 finalizou 3 consulta(s).
+2026-07-14 19:04:04,105 [INFO] Usuario virtual 3 finalizou 3 consulta(s).
+2026-07-14 19:04:04,134 [INFO] Usuario virtual 7 finalizou 3 consulta(s).
+2026-07-14 19:04:04,136 [INFO] Logs gravados em results/trino
+=== BENCHMARK users=20 ===
+2026-07-14 19:04:04,315 [INFO] Iniciando benchmark id_execucao=4 usuarios=20 modo=mixed-workload repeticoes=1
+2026-07-14 19:05:33,987 [INFO] Usuario virtual 4 finalizou 3 consulta(s).
+2026-07-14 19:05:34,946 [INFO] Usuario virtual 18 finalizou 3 consulta(s).
+2026-07-14 19:05:35,145 [INFO] Usuario virtual 9 finalizou 3 consulta(s).
+2026-07-14 19:05:35,341 [INFO] Usuario virtual 14 finalizou 3 consulta(s).
+2026-07-14 19:05:36,027 [INFO] Usuario virtual 10 finalizou 3 consulta(s).
+2026-07-14 19:05:36,236 [INFO] Usuario virtual 8 finalizou 3 consulta(s).
+2026-07-14 19:05:36,359 [INFO] Usuario virtual 15 finalizou 3 consulta(s).
+2026-07-14 19:05:36,528 [INFO] Usuario virtual 2 finalizou 3 consulta(s).
+2026-07-14 19:05:36,547 [INFO] Usuario virtual 20 finalizou 3 consulta(s).
+2026-07-14 19:05:36,548 [INFO] Usuario virtual 13 finalizou 3 consulta(s).
+2026-07-14 19:05:36,600 [INFO] Usuario virtual 3 finalizou 3 consulta(s).
+2026-07-14 19:05:36,850 [INFO] Usuario virtual 19 finalizou 3 consulta(s).
+2026-07-14 19:05:36,877 [INFO] Usuario virtual 12 finalizou 3 consulta(s).
+2026-07-14 19:05:36,911 [INFO] Usuario virtual 7 finalizou 3 consulta(s).
+2026-07-14 19:05:36,947 [INFO] Usuario virtual 16 finalizou 3 consulta(s).
+2026-07-14 19:05:36,949 [INFO] Usuario virtual 11 finalizou 3 consulta(s).
+2026-07-14 19:05:36,952 [INFO] Usuario virtual 6 finalizou 3 consulta(s).
+2026-07-14 19:05:37,002 [INFO] Usuario virtual 1 finalizou 3 consulta(s).
+2026-07-14 19:05:37,014 [INFO] Usuario virtual 5 finalizou 3 consulta(s).
+2026-07-14 19:05:37,025 [INFO] Usuario virtual 17 finalizou 3 consulta(s).
+2026-07-14 19:05:37,027 [INFO] Logs gravados em results/trino
+=== COPY BASE RESULTS ===
+=== STORAGE run_id=3 ===
+2026-07-14 19:05:37,988 [INFO] Lendo metadados Parquet 1/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2022-08/distribuicao-orgaos-siorg-2022-08.parquet
+2026-07-14 19:05:38,372 [INFO] Lendo metadados Parquet 2/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2022-09/distribuicao-orgaos-siorg-2022-09.parquet
+2026-07-14 19:05:38,880 [INFO] Lendo metadados Parquet 3/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2022-10/distribuicao-orgaos-siorg-2022-10.parquet
+2026-07-14 19:05:39,412 [INFO] Lendo metadados Parquet 4/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2022-11/distribuicao-orgaos-siorg-2022-11.parquet
+2026-07-14 19:05:39,729 [INFO] Lendo metadados Parquet 5/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2022-12/distribuicao-orgaos-siorg-2022-12.parquet
+2026-07-14 19:05:40,051 [INFO] Lendo metadados Parquet 6/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-01/distribuicao-orgaos-siorg-2023-01.parquet
+2026-07-14 19:05:40,322 [INFO] Lendo metadados Parquet 7/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-02/distribuicao-orgaos-siorg-2023-02.parquet
+2026-07-14 19:05:40,835 [INFO] Lendo metadados Parquet 8/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-03/distribuicao-orgaos-siorg-2023-03.parquet
+2026-07-14 19:05:41,194 [INFO] Lendo metadados Parquet 9/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-04/distribuicao-orgaos-siorg-2023-04.parquet
+2026-07-14 19:05:41,480 [INFO] Lendo metadados Parquet 10/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-05/distribuicao-orgaos-siorg-2023-05.parquet
+2026-07-14 19:05:41,937 [INFO] Lendo metadados Parquet 11/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-06/distribuicao-orgaos-siorg-2023-06.parquet
+2026-07-14 19:05:42,293 [INFO] Lendo metadados Parquet 12/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-07/distribuicao-orgaos-siorg-2023-07.parquet
+2026-07-14 19:05:42,822 [INFO] Lendo metadados Parquet 13/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-08/distribuicao-orgaos-siorg-2023-08.parquet
+2026-07-14 19:05:43,071 [INFO] Lendo metadados Parquet 14/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-09/distribuicao-orgaos-siorg-2023-09.parquet
+2026-07-14 19:05:43,346 [INFO] Lendo metadados Parquet 15/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-10/distribuicao-orgaos-siorg-2023-10.parquet
+2026-07-14 19:05:43,620 [INFO] Lendo metadados Parquet 16/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-11/distribuicao-orgaos-siorg-2023-11.parquet
+2026-07-14 19:05:44,078 [INFO] Lendo metadados Parquet 17/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2023-12/distribuicao-orgaos-siorg-2023-12.parquet
+2026-07-14 19:05:44,673 [INFO] Lendo metadados Parquet 18/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-01/distribuicao-orgaos-siorg-2024-01.parquet
+2026-07-14 19:05:44,897 [INFO] Lendo metadados Parquet 19/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-03/distribuicao-orgaos-siorg-2024-03.parquet
+2026-07-14 19:05:45,248 [INFO] Lendo metadados Parquet 20/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-04/distribuicao-orgaos-siorg-2024-04.parquet
+2026-07-14 19:05:45,605 [INFO] Lendo metadados Parquet 21/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-05/distribuicao-orgaos-siorg-2024-05.parquet
+2026-07-14 19:05:46,008 [INFO] Lendo metadados Parquet 22/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-06/distribuicao-orgaos-siorg-2024-06.parquet
+2026-07-14 19:05:46,257 [INFO] Lendo metadados Parquet 23/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-07/distribuicao-orgaos-siorg-2024-07.parquet
+2026-07-14 19:05:46,509 [INFO] Lendo metadados Parquet 24/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-09/distribuicao-orgaos-siorg-2024-09.parquet
+2026-07-14 19:05:47,108 [INFO] Lendo metadados Parquet 25/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-10/distribuicao-orgaos-siorg-2024-10.parquet
+2026-07-14 19:05:47,548 [INFO] Lendo metadados Parquet 26/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-11/distribuicao-orgaos-siorg-2024-11.parquet
+2026-07-14 19:05:47,935 [INFO] Lendo metadados Parquet 27/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2024-12/distribuicao-orgaos-siorg-2024-12.parquet
+2026-07-14 19:05:48,268 [INFO] Lendo metadados Parquet 28/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-01/distribuicao-orgaos-siorg-2025-01.parquet
+2026-07-14 19:05:48,586 [INFO] Lendo metadados Parquet 29/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-02/distribuicao-orgaos-siorg-2025-02.parquet
+2026-07-14 19:05:48,819 [INFO] Lendo metadados Parquet 30/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-03/distribuicao-orgaos-siorg-2025-03.parquet
+2026-07-14 19:05:49,184 [INFO] Lendo metadados Parquet 31/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-04/distribuicao-orgaos-siorg-2025-04.parquet
+2026-07-14 19:05:49,450 [INFO] Lendo metadados Parquet 32/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-05/distribuicao-orgaos-siorg-2025-05.parquet
+2026-07-14 19:05:49,711 [INFO] Lendo metadados Parquet 33/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-06/distribuicao-orgaos-siorg-2025-06.parquet
+2026-07-14 19:05:50,001 [INFO] Lendo metadados Parquet 34/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-07/distribuicao-orgaos-siorg-2025-07.parquet
+2026-07-14 19:05:50,314 [INFO] Lendo metadados Parquet 35/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-08/distribuicao-orgaos-siorg-2025-08.parquet
+2026-07-14 19:05:50,658 [INFO] Lendo metadados Parquet 36/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-10/distribuicao-orgaos-siorg-2025-10.parquet
+2026-07-14 19:05:51,115 [INFO] Lendo metadados Parquet 37/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-11/distribuicao-orgaos-siorg-2025-11.parquet
+2026-07-14 19:05:51,417 [INFO] Lendo metadados Parquet 38/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2025-12/distribuicao-orgaos-siorg-2025-12.parquet
+2026-07-14 19:05:51,706 [INFO] Lendo metadados Parquet 39/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-01/distribuicao-orgaos-siorg-2026-01.parquet
+2026-07-14 19:05:52,164 [INFO] Lendo metadados Parquet 40/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-02/distribuicao-orgaos-siorg-2026-02.parquet
+2026-07-14 19:05:52,610 [INFO] Lendo metadados Parquet 41/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-03/distribuicao-orgaos-siorg-2026-03.parquet
+2026-07-14 19:05:53,065 [INFO] Lendo metadados Parquet 42/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-04/distribuicao-orgaos-siorg-2026-04.parquet
+2026-07-14 19:05:53,338 [INFO] Lendo metadados Parquet 43/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-05/distribuicao-orgaos-siorg-2026-05.parquet
+2026-07-14 19:05:54,026 [INFO] Lendo metadados Parquet 44/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-06/distribuicao-orgaos-siorg-2026-06.parquet
+2026-07-14 19:05:54,573 [INFO] Lendo metadados Parquet 45/45: iceberg/staging/trino_iceberg/run_3/distribuicao_orgaos/distribuicao-orgaos-siorg-2026-07/distribuicao-orgaos-siorg-2026-07.parquet
+2026-07-14 19:05:55,053 [INFO] Lendo metadados Parquet 1/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2022-08/estrutura-organizacional-completa-2022-08.parquet
+2026-07-14 19:05:55,354 [INFO] Lendo metadados Parquet 2/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2022-09/estrutura-organizacional-completa-2022-09.parquet
+2026-07-14 19:05:55,585 [INFO] Lendo metadados Parquet 3/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2022-10/estrutura-organizacional-completa-2022-10.parquet
+2026-07-14 19:05:55,955 [INFO] Lendo metadados Parquet 4/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2022-11/estrutura-organizacional-completa-2022-11.parquet
+2026-07-14 19:05:56,196 [INFO] Lendo metadados Parquet 5/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2022-12/estrutura-organizacional-completa-2022-12.parquet
+2026-07-14 19:05:56,566 [INFO] Lendo metadados Parquet 6/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-01/estrutura-organizacional-completa-2023-01.parquet
+2026-07-14 19:05:56,784 [INFO] Lendo metadados Parquet 7/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-02/estrutura-organizacional-completa-2023-02.parquet
+2026-07-14 19:05:57,062 [INFO] Lendo metadados Parquet 8/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-03/estrutura-organizacional-completa-2023-03.parquet
+2026-07-14 19:05:57,392 [INFO] Lendo metadados Parquet 9/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-04/estrutura-organizacional-completa-2023-04.parquet
+2026-07-14 19:05:57,708 [INFO] Lendo metadados Parquet 10/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-05/estrutura-organizacional-completa-2023-05.parquet
+2026-07-14 19:05:58,146 [INFO] Lendo metadados Parquet 11/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-06/estrutura-organizacional-completa-2023-06.parquet
+2026-07-14 19:05:58,353 [INFO] Lendo metadados Parquet 12/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-07/estrutura-organizacional-completa-2023-07.parquet
+2026-07-14 19:05:58,614 [INFO] Lendo metadados Parquet 13/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-08/estrutura-organizacional-completa-2023-08.parquet
+2026-07-14 19:05:59,001 [INFO] Lendo metadados Parquet 14/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-09/estrutura-organizacional-completa-2023-09.parquet
+2026-07-14 19:05:59,336 [INFO] Lendo metadados Parquet 15/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-10/estrutura-organizacional-completa-2023-10.parquet
+2026-07-14 19:05:59,688 [INFO] Lendo metadados Parquet 16/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-11/estrutura-organizacional-completa-2023-11.parquet
+2026-07-14 19:06:00,042 [INFO] Lendo metadados Parquet 17/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2023-12/estrutura-organizacional-completa-2023-12.parquet
+2026-07-14 19:06:00,375 [INFO] Lendo metadados Parquet 18/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-01/estrutura-organizacional-completa-2024-01.parquet
+2026-07-14 19:06:00,704 [INFO] Lendo metadados Parquet 19/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-02/estrutura-organizacional-completa-2024-02.parquet
+2026-07-14 19:06:01,008 [INFO] Lendo metadados Parquet 20/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-03/estrutura-organizacional-completa-2024-03.parquet
+2026-07-14 19:06:01,287 [INFO] Lendo metadados Parquet 21/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-04/estrutura-organizacional-completa-2024-04.parquet
+2026-07-14 19:06:01,608 [INFO] Lendo metadados Parquet 22/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-05/estrutura-organizacional-completa-2024-05.parquet
+2026-07-14 19:06:02,104 [INFO] Lendo metadados Parquet 23/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-06/estrutura-organizacional-completa-2024-06.parquet
+2026-07-14 19:06:02,452 [INFO] Lendo metadados Parquet 24/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-07/estrutura-organizacional-completa-2024-07.parquet
+2026-07-14 19:06:02,750 [INFO] Lendo metadados Parquet 25/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-09/estrutura-organizacional-completa-2024-09.parquet
+2026-07-14 19:06:03,108 [INFO] Lendo metadados Parquet 26/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-10/estrutura-organizacional-completa-2024-10.parquet
+2026-07-14 19:06:03,442 [INFO] Lendo metadados Parquet 27/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-11/estrutura-organizacional-completa-2024-11.parquet
+2026-07-14 19:06:03,727 [INFO] Lendo metadados Parquet 28/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2024-12/estrutura-organizacional-completa-2024-12.parquet
+2026-07-14 19:06:04,305 [INFO] Lendo metadados Parquet 29/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-01/estrutura-organizacional-completa-2025-01.parquet
+2026-07-14 19:06:04,531 [INFO] Lendo metadados Parquet 30/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-02/estrutura-organizacional-completa-2025-02.parquet
+2026-07-14 19:06:04,925 [INFO] Lendo metadados Parquet 31/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-03/estrutura-organizacional-completa-2025-03.parquet
+2026-07-14 19:06:05,209 [INFO] Lendo metadados Parquet 32/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-04/estrutura-organizacional-completa-2025-04.parquet
+2026-07-14 19:06:05,516 [INFO] Lendo metadados Parquet 33/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-05/estrutura-organizacional-completa-2025-05.parquet
+2026-07-14 19:06:06,015 [INFO] Lendo metadados Parquet 34/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-06/estrutura-organizacional-completa-2025-06.parquet
+2026-07-14 19:06:06,381 [INFO] Lendo metadados Parquet 35/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-07/estrutura-organizacional-completa-2025-07.parquet
+2026-07-14 19:06:07,548 [INFO] Lendo metadados Parquet 36/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-08/estrutura-organizacional-completa-2025-08.parquet
+2026-07-14 19:06:07,853 [INFO] Lendo metadados Parquet 37/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-10/estrutura-organizacional-completa-2025-10.parquet
+2026-07-14 19:06:08,154 [INFO] Lendo metadados Parquet 38/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-11/estrutura-organizacional-completa-2025-11.parquet
+2026-07-14 19:06:08,467 [INFO] Lendo metadados Parquet 39/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2025-12/estrutura-organizacional-completa-2025-12.parquet
+2026-07-14 19:06:08,874 [INFO] Lendo metadados Parquet 40/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-01/estrutura-organizacional-completa-2026-01.parquet
+2026-07-14 19:06:09,129 [INFO] Lendo metadados Parquet 41/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-02/estrutura-organizacional-completa-2026-02.parquet
+2026-07-14 19:06:09,654 [INFO] Lendo metadados Parquet 42/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-03/estrutura-organizacional-completa-2026-03.parquet
+2026-07-14 19:06:09,865 [INFO] Lendo metadados Parquet 43/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-04/estrutura-organizacional-completa-2026-04.parquet
+2026-07-14 19:06:10,128 [INFO] Lendo metadados Parquet 44/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-05/estrutura-organizacional-completa-2026-05.parquet
+2026-07-14 19:06:10,793 [INFO] Lendo metadados Parquet 45/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-06/estrutura-organizacional-completa-2026-06.parquet
+2026-07-14 19:06:11,104 [INFO] Lendo metadados Parquet 46/46: iceberg/staging/trino_iceberg/run_3/estrutura_organizacional_completa/estrutura-organizacional-completa-2026-07/estrutura-organizacional-completa-2026-07.parquet
+2026-07-14 19:06:11,479 [INFO] Resumo de armazenamento gravado em results/trino_aws_fixed/storage_summary.csv
+=== ENV JSON ===
+  File "<string>", line 1
+    import json, os, platform, subprocess; from datetime import datetime, timezone; meta={'engine':'trino_iceberg','environment':'aws_fixed','instance_id':'i-005d2887676bd6690','instance_type':'m7i.2xlarge','vcpu':os.cpu_count(),'memory_gib':32,'region':os.environ.get('AWS_DEFAULT_REGION'),'bucket':os.environ.get('S3_BUCKET_NAME'),'trino_image':'trinodb/trino:482','timestamp_utc':datetime.now(timezone.utc).isoformat(),'platform':platform.platform()};\ntry:\n meta['docker_ps']=subprocess.check_output(['docker','ps','--format','{{.Image}} {{.Status}}'], text=True).strip()\nexcept Exception as exc:\n meta['docker_ps_error']=str(exc)\nos.makedirs('results/trino_aws_fixed', exist_ok=True); open('results/trino_aws_fixed/environment.json','w',encoding='utf-8').write(json.dumps(meta, indent=2)); print(json.dumps(meta, indent=2))
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+SyntaxError: unexpected character after line continuation character

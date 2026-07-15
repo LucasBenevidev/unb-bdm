@@ -7,6 +7,10 @@ __pycache__/
 temp_downloads/
 *.log
 logs/
-results/
+!results/
+!results/trino/
+!results/trino/**
+!results/comparison/
+!results/comparison/**
 .ipynb_checkpoints/
 .aws_trino/

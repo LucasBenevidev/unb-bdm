@@ -1,0 +1,5 @@
+engine,run_id,table,data_files,compressed_bytes,compressed_mib,uncompressed_bytes,uncompressed_mib,compression_ratio,source_csv_bytes,csv_to_engine_ratio,total_rows
+clickhouse,,estrutura_organizacional_completa,,545028833,519.7799997329712,6517612871,6215.6799993515015,11.95,,,4023834
+clickhouse,,distribuicao_orgaos,,139680808,133.20999908447266,2050846883,1955.8399991989136,14.7,,,5351312
+trino,3,distribuicao_orgaos,45,173712932,165.665562,477018790,454.920568,2.746018,1781976087,10.258166,
+trino,3,estrutura_organizacional_completa,46,537974403,513.052371,3519245681,3356.214219,6.54166,6334533830,11.774787,

@@ -1,0 +1,13 @@
+{
+  "engine": "trino_iceberg",
+  "environment": "aws_fixed",
+  "instance_id": "i-005d2887676bd6690",
+  "instance_type": "m7i.2xlarge",
+  "vcpu": 8,
+  "memory_gib": 32,
+  "region": "us-east-1",
+  "bucket": "unb-bdm-siorg",
+  "trino_image": "trinodb/trino:482",
+  "timestamp_utc": "2026-07-14T19:14:16.069415+00:00",
+  "platform": "Linux-6.8.0-1060-aws-x86_64-with-glibc2.35"
+}

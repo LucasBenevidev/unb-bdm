@@ -1,0 +1,3 @@
+engine,run_id,table,parquet_files,compressed_bytes,compressed_mib,uncompressed_bytes,uncompressed_mib,compression_ratio,source_csv_bytes,csv_to_parquet_ratio
+trino_iceberg,3,distribuicao_orgaos,45,173712932,165.665562,477018790,454.920568,2.746018,1781976087,10.258166
+trino_iceberg,3,estrutura_organizacional_completa,46,537974403,513.052371,3519245681,3356.214219,6.54166,6334533830,11.774787
